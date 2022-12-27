@@ -14,12 +14,13 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 const usersCollection = client.db("DailyTaskManager").collection("Users");
+const tasksCollection = client.db("DailyTaskManager").collection("Tasks");
 
 
 
 async function run() {
     try {
-        
+
         //adding users
         app.post('/users', async (req, res) => {
             const users = req.body
@@ -28,6 +29,12 @@ async function run() {
         })
 
 
+
+        app.post('/tasks', async (req, res) => {
+            const tasks = req.body;
+            const result = await tasksCollection.insertOne(tasks)
+            res.send(tasks);
+        })
     }
     finally {
 
