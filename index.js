@@ -29,7 +29,24 @@ async function run() {
         })
 
 
+        //getting tasks without media
+        app.get('/text/tasks', async (req, res) => {
+            const query = { imageStatus: false }
+            const result = await tasksCollection.find(query).toArray()
+            res.send(result)
+        })
 
+        
+        //getting tasks with media
+        app.get('/media/tasks', async (req, res) => {
+            const query = { imageStatus: true }
+            const result = await tasksCollection.find(query).toArray()
+            res.send(result)
+
+        })
+
+
+        //adding task
         app.post('/tasks', async (req, res) => {
             const tasks = req.body;
             const result = await tasksCollection.insertOne(tasks)
