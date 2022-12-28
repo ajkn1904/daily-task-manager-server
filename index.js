@@ -5,6 +5,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 const app = express();
+const jwt = require('jsonwebtoken') 
 
 app.use(cors());
 app.use(express.json());
@@ -18,8 +19,40 @@ const tasksCollection = client.db("DailyTaskManager").collection("Tasks");
 
 
 
+
+//jwt verification
+const verifyJwt = (req, res, next) => {
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+        return res.status(401).send('Unauthorized Access');
+    }
+
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'Forbidden Access' })
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
+
 async function run() {
     try {
+        //jwt
+        app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query)
+            console.log(user);
+            //token
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '1d' })
+                return res.send({ accessToken: token });
+            }
+            res.status(403).send({ accessToken: '' })
+        })
+
 
         //adding users
         app.post('/users', async (req, res) => {
@@ -30,8 +63,13 @@ async function run() {
 
 
         //getting tasks without media
-        app.get('/text/tasks', async (req, res) => {
+        app.get('/text/tasks', verifyJwt, async (req, res) => {
             const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden access from getting text' })
+            }
             const query = { imageStatus: false, email: email }
             const result = await tasksCollection.find(query).toArray()
             res.send(result)
@@ -39,8 +77,13 @@ async function run() {
 
 
         //getting tasks with media
-        app.get('/media/tasks', async (req, res) => {
+        app.get('/media/tasks', verifyJwt, async (req, res) => {
             const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden access from getting media' })
+            }
             const query = { imageStatus: true, email: email }
             const result = await tasksCollection.find(query).toArray()
             res.send(result)
@@ -57,7 +100,7 @@ async function run() {
 
 
         //updating task data
-        app.put('/tasks/:id', async (req, res) => {
+        app.put('/tasks/:id', verifyJwt, async (req, res) => {
             const id = req.params.id;
             const status = req.body;
             const query = { _id: ObjectId(id) }
@@ -75,7 +118,7 @@ async function run() {
 
 
         //deleting task
-        app.delete('/dltTasks/id', async (req, res) => {
+        app.delete('/tasks/id', verifyJwt, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await tasksCollection.deleteOne(query)
