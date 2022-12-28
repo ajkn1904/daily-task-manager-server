@@ -31,15 +31,17 @@ async function run() {
 
         //getting tasks without media
         app.get('/text/tasks', async (req, res) => {
-            const query = { imageStatus: false }
+            const email = req.query.email;
+            const query = { imageStatus: false, email: email }
             const result = await tasksCollection.find(query).toArray()
             res.send(result)
         })
 
-        
+
         //getting tasks with media
         app.get('/media/tasks', async (req, res) => {
-            const query = { imageStatus: true }
+            const email = req.query.email;
+            const query = { imageStatus: true, email: email }
             const result = await tasksCollection.find(query).toArray()
             res.send(result)
 
