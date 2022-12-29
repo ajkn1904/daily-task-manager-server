@@ -118,7 +118,7 @@ async function run() {
 
 
         //deleting task
-        app.delete('/tasks/id', verifyJwt, async (req, res) => {
+        app.delete('/tasks/:id', verifyJwt, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await tasksCollection.deleteOne(query)
