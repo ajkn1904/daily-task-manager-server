@@ -117,7 +117,8 @@ async function run() {
             const updatedDoc = {
                 $set: {
                     taskName: status.taskName,
-                    description: status.description
+                    description: status.description,
+                    comment: status.comment
                 }
             }
             const result = await tasksCollection.updateOne(query, updatedDoc, option)
