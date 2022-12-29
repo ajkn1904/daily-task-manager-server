@@ -5,7 +5,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 const app = express();
-const jwt = require('jsonwebtoken') 
+const jwt = require('jsonwebtoken')
 
 app.use(cors());
 app.use(express.json());
@@ -121,6 +121,59 @@ async function run() {
                 }
             }
             const result = await tasksCollection.updateOne(query, updatedDoc, option)
+            res.send(result)
+        })
+
+
+
+
+        //getting tasks with if completed
+        app.get('/completed/tasks', verifyJwt, async (req, res) => {
+            const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+
+            if (email !== decodedEmail) {
+                return res.status(403).send({ message: 'forbidden access from getting media' })
+            }
+
+            const query = { isComplete: true, email: email }
+            const result = await tasksCollection.find(query).toArray()
+            res.send(result)
+
+        })
+
+
+
+
+        // updating status of a task to Completed
+        app.put('/complete/tasks/:id', verifyJwt, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const option = { upsert: true }
+            const task = {
+                $set: {
+                    isComplete: true
+                }
+            }
+            const result = await tasksCollection.updateOne(query, task, option)
+            res.send(result)
+        })
+
+
+
+
+
+        // updating status of a task to not completed
+        app.put('/notComplete/tasks/:id', verifyJwt, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const option = { upsert: true }
+            const task = {
+                $set: {
+                    isComplete: false
+                }
+            }
+            const result = await tasksCollection.updateOne(query, task, option)
             res.send(result)
         })
 
