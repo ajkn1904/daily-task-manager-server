@@ -91,6 +91,15 @@ async function run() {
         })
 
 
+        //getting tasks by id
+        app.get('/tasks/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await tasksCollection.findOne(query)
+            res.send(result)
+        })
+
+
         //adding task
         app.post('/tasks', async (req, res) => {
             const tasks = req.body;
