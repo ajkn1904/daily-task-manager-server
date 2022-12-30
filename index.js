@@ -56,16 +56,10 @@ async function run() {
 
         //adding users
         app.post('/users', async (req, res) => {
-            const query = req.body.email
-            const doesExist = await usersCollection.findOne(query)
-            if (!doesExist) {
-                const users = req.body
-                const result = await usersCollection.insertOne(users)
-                res.send(result)
-            }
-            else{
-                return
-            }
+            const users = req.body
+            const result = await usersCollection.insertOne(users)
+            res.send(result)
+
         })
 
 
