@@ -72,7 +72,7 @@ async function run() {
                 return res.status(403).send({ message: 'forbidden access from getting text' })
             }
             const query = { imageStatus: false, email: email }
-            const result = await tasksCollection.find(query).toArray()
+            const result = await tasksCollection.find(query).sort({ _id: -1 }).toArray()
             res.send(result)
         })
 
@@ -86,7 +86,7 @@ async function run() {
                 return res.status(403).send({ message: 'forbidden access from getting media' })
             }
             const query = { imageStatus: true, email: email }
-            const result = await tasksCollection.find(query).toArray()
+            const result = await tasksCollection.find(query).sort({ _id: -1 }).toArray()
             res.send(result)
 
         })
